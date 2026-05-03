@@ -1,0 +1,269 @@
+.booking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.filter-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  background: white;
+  border: 1.5px solid #e5e7eb;
+  color: #4b5563;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.filter-btn:hover {
+  border-color: #1e3a8a;
+  color: #1e3a8a;
+}
+
+.filter-btn.active {
+  background: #1e3a8a;
+  color: white;
+  border-color: #1e3a8a;
+}
+
+.empty-list {
+  text-align: center;
+  color: #9ca3af;
+  padding: 24px;
+  font-size: 13px;
+}
+
+.booking-card {
+  background: white;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 14px;
+  transition: all 0.15s ease;
+}
+
+.booking-card:hover {
+  border-color: #cbd5e1;
+}
+
+.booking-card.owner {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+.booking-card.past {
+  opacity: 0.65;
+  background: #f9fafb;
+}
+
+.booking-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.booking-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.booking-info h4 {
+  color: #1f2937;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  text-transform: capitalize;
+  line-height: 1.4;
+}
+
+.arrow {
+  color: #9ca3af;
+  margin: 0 4px;
+}
+
+.booking-user {
+  color: #6b7280;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.owner-badge {
+  background: #1e3a8a;
+  color: white;
+  padding: 1px 7px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.booking-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.btn-edit,
+.btn-delete,
+.btn-save,
+.btn-cancel,
+.btn-confirm-delete {
+  background: white;
+  border: 1.5px solid #e5e7eb;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.btn-edit:hover {
+  border-color: #1e3a8a;
+  color: #1e3a8a;
+  background: #eff6ff;
+}
+
+.btn-delete:hover {
+  border-color: #dc2626;
+  color: #dc2626;
+  background: #fef2f2;
+}
+
+.btn-save {
+  background: #1e3a8a;
+  color: white;
+  border-color: #1e3a8a;
+}
+
+.btn-save:hover {
+  background: #1e40af;
+}
+
+.btn-cancel {
+  color: #6b7280;
+}
+
+.btn-cancel:hover {
+  border-color: #9ca3af;
+  color: #4b5563;
+}
+
+.btn-confirm-delete {
+  background: #dc2626;
+  color: white;
+  border-color: #dc2626;
+}
+
+.btn-confirm-delete:hover {
+  background: #b91c1c;
+}
+
+.booking-notes {
+  background: white;
+  border-left: 3px solid #1e3a8a;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #4b5563;
+  border-radius: 0 4px 4px 0;
+}
+
+.booking-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  color: #9ca3af;
+  flex-wrap: wrap;
+}
+
+.meta-badge {
+  background: #1e3a8a;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.confirm-delete {
+  margin-top: 10px;
+  padding: 10px;
+  background: #fef2f2;
+  border: 1.5px solid #fecaca;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.confirm-delete p {
+  flex: 1;
+  font-size: 12px;
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.edit-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.edit-row label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+  color: #1e3a8a;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.edit-row input,
+.edit-form textarea {
+  padding: 8px 10px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 5px;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.edit-row input:focus,
+.edit-form textarea:focus {
+  outline: none;
+  border-color: #1e3a8a;
+}
+
+.edit-form textarea {
+  resize: vertical;
+  min-height: 50px;
+}
+
+.edit-buttons {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}

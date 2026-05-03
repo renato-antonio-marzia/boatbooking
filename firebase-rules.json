@@ -1,0 +1,46 @@
+{
+  "rules": {
+    "_comment_authorized_users": "Inserire qui gli UID dei fratelli autorizzati. Sostituire i placeholder con gli UID reali ottenuti dopo la prima registrazione di ciascuno.",
+
+    "authorized_users": {
+      "NzhPztV5IjNhFXXBEsShG3Qe4VG3": true,
+      "UID_FRATELLO_2_PLACEHOLDER": true,
+      "UID_FRATELLO_3_PLACEHOLDER": true
+    },
+
+    "bookings": {
+      ".read": "auth != null && root.child('authorized_users').child(auth.uid).val() === true",
+      ".write": "auth != null && root.child('authorized_users').child(auth.uid).val() === true",
+
+      ".indexOn": ["startDate", "endDate", "userId"],
+
+      "$bookingId": {
+        ".validate": "newData.hasChildren(['startDate', 'endDate', 'userId', 'userName', 'createdAt'])",
+
+        ".write": "auth != null && root.child('authorized_users').child(auth.uid).val() === true && (!data.exists() || data.child('userId').val() === auth.uid)",
+
+        "userId": {
+          ".validate": "newData.val() === auth.uid"
+        },
+        "userName": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 100"
+        },
+        "startDate": {
+          ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)"
+        },
+        "endDate": {
+          ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) && newData.val() >= newData.parent().child('startDate').val()"
+        },
+        "notes": {
+          ".validate": "newData.isString() && newData.val().length <= 200"
+        },
+        "createdAt": {
+          ".validate": "newData.isString()"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    }
+  }
+}
