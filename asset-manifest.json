@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/boatbooking/static/css/main.97d7ea1b.css",
-    "main.js": "/boatbooking/static/js/main.8b9b0f05.js",
+    "main.css": "/boatbooking/static/css/main.1c9a7c86.css",
+    "main.js": "/boatbooking/static/js/main.621b5367.js",
     "index.html": "/boatbooking/index.html",
-    "main.97d7ea1b.css.map": "/boatbooking/static/css/main.97d7ea1b.css.map",
-    "main.8b9b0f05.js.map": "/boatbooking/static/js/main.8b9b0f05.js.map"
+    "main.1c9a7c86.css.map": "/boatbooking/static/css/main.1c9a7c86.css.map",
+    "main.621b5367.js.map": "/boatbooking/static/js/main.621b5367.js.map"
   },
   "entrypoints": [
-    "static/css/main.97d7ea1b.css",
-    "static/js/main.8b9b0f05.js"
+    "static/css/main.1c9a7c86.css",
+    "static/js/main.621b5367.js"
   ]
 }
