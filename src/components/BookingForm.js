@@ -1,30 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { validateBooking } from '../utils/bookingValidation';
+import {
+  validateBooking,
+  checkConsecutiveWeekends,
+  formatWeekendLabel,
+} from '../utils/bookingValidation';
 import { todayKey } from '../utils/dateHelpers';
 import './BookingForm.css';
 
-/**
- * BookingForm - form per creazione di una nuova prenotazione.
- *
- * MIGLIORAMENTI rispetto a Copilot:
- * - Validazione in tempo reale della sovrapposizione con altre prenotazioni
- * - Blocco delle date passate tramite attributo `min`
- * - Mostra elenco dei conflitti con il nome del prenotatore
- * - Anteprima della durata in giorni
- * - Limite massimo a 30 giorni consecutivi
- */
-function BookingForm({ onSubmit, selectedDateKey, existingBookings }) {
+function BookingForm({ onSubmit, selectedDateKey, existingBookings, currentUserId }) {
   const today = todayKey();
-  const initialDate = selectedDateKey && selectedDateKey >= today ? selectedDateKey : today;
+  const initialDate =
+    selectedDateKey && selectedDateKey >= today ? selectedDateKey : today;
 
   const [startDate, setStartDate] = useState(initialDate);
   const [endDate, setEndDate] = useState(initialDate);
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
   const [conflicts, setConflicts] = useState([]);
+  const [weekendWarning, setWeekendWarning] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Aggiorna la data inizio quando l'utente clicca su un giorno del calendario
   useEffect(() => {
     if (selectedDateKey && selectedDateKey >= today) {
       setStartDate(selectedDateKey);
@@ -35,10 +30,10 @@ function BookingForm({ onSubmit, selectedDateKey, existingBookings }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDateKey]);
 
-  // Validazione live (preview dei conflitti)
   useEffect(() => {
     if (!startDate || !endDate) {
       setConflicts([]);
+      setWeekendWarning(null);
       return;
     }
     const validation = validateBooking({
@@ -47,7 +42,17 @@ function BookingForm({ onSubmit, selectedDateKey, existingBookings }) {
       existingBookings,
     });
     setConflicts(validation.conflicts);
-  }, [startDate, endDate, existingBookings]);
+
+    if (currentUserId) {
+      const w = checkConsecutiveWeekends({
+        startDate,
+        endDate,
+        userId: currentUserId,
+        existingBookings,
+      });
+      setWeekendWarning(w.hasConflict ? w : null);
+    }
+  }, [startDate, endDate, existingBookings, currentUserId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -55,7 +60,6 @@ function BookingForm({ onSubmit, selectedDateKey, existingBookings }) {
     setLoading(true);
     try {
       await onSubmit({ startDate, endDate, notes: notes.trim() });
-      // Reset
       setStartDate(today);
       setEndDate(today);
       setNotes('');
@@ -65,7 +69,6 @@ function BookingForm({ onSubmit, selectedDateKey, existingBookings }) {
     setLoading(false);
   };
 
-  // Calcolo durata
   const durationDays = (() => {
     if (!startDate || !endDate || startDate > endDate) return 0;
     const diff = (new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24);
@@ -73,6 +76,7 @@ function BookingForm({ onSubmit, selectedDateKey, existingBookings }) {
   })();
 
   const hasConflicts = conflicts.length > 0;
+  const hasWeekendWarning = weekendWarning !== null;
 
   return (
     <form className="booking-form" onSubmit={handleSubmit}>
@@ -107,7 +111,8 @@ function BookingForm({ onSubmit, selectedDateKey, existingBookings }) {
 
       {durationDays > 0 && (
         <div className="duration-info">
-          Durata: <strong>{durationDays}</strong> {durationDays === 1 ? 'giorno' : 'giorni'}
+          Durata: <strong>{durationDays}</strong>{' '}
+          {durationDays === 1 ? 'giorno' : 'giorni'}
         </div>
       )}
 
@@ -138,14 +143,39 @@ function BookingForm({ onSubmit, selectedDateKey, existingBookings }) {
         </div>
       )}
 
+      {hasWeekendWarning && !hasConflicts && (
+        <div className="weekend-warning-box">
+          <strong>⚠️ Attenzione: due weekend consecutivi</strong>
+          <p>
+            {weekendWarning.reason === 'self'
+              ? `Questa prenotazione copre due weekend consecutivi (${formatWeekendLabel(
+                  weekendWarning.previousWeekend
+                )} e ${formatWeekendLabel(weekendWarning.currentWeekend)}).`
+              : `Hai già una prenotazione sul weekend del ${formatWeekendLabel(
+                  weekendWarning.previousWeekend
+                )} e questa nuova ne tocca quello successivo (${formatWeekendLabel(
+                  weekendWarning.currentWeekend
+                )}).`}
+          </p>
+          <p className="weekend-warning-note">
+            Per equità tra fratelli, evitiamo due weekend consecutivi. Puoi
+            comunque procedere se è una scelta condivisa.
+          </p>
+        </div>
+      )}
+
       {error && <p className="error-message">{error}</p>}
 
       <button
         type="submit"
         disabled={loading || hasConflicts}
-        className="submit-btn"
+        className={`submit-btn ${hasWeekendWarning ? 'submit-btn-warning' : ''}`}
       >
-        {loading ? 'Salvataggio...' : 'Conferma prenotazione'}
+        {loading
+          ? 'Salvataggio...'
+          : hasWeekendWarning
+          ? 'Procedi nonostante l\'avviso ⚠️'
+          : 'Conferma prenotazione'}
       </button>
     </form>
   );

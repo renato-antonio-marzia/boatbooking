@@ -71,6 +71,15 @@ export function daysBetween(startKey, endKey) {
 }
 
 /**
+ * Aggiunge n giorni a una stringa YYYY-MM-DD e ritorna la nuova stringa.
+ */
+export function addDaysKey(dateKey, n) {
+  const d = parseLocalDate(dateKey);
+  d.setDate(d.getDate() + n);
+  return formatDateKey(d);
+}
+
+/**
  * Genera tutti i giorni tra startKey ed endKey (inclusi), in formato YYYY-MM-DD.
  */
 export function expandDateRange(startKey, endKey) {

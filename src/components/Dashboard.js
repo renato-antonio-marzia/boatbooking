@@ -212,6 +212,7 @@ function Dashboard({ user }) {
                 onSubmit={handleAddBooking}
                 selectedDateKey={selectedDate}
                 existingBookings={bookings}
+                currentUserId={user.uid}
               />
             )}
 

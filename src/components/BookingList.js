@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import { format, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { parseLocalDate, daysBetween, todayKey } from '../utils/dateHelpers';
+import {
+  checkConsecutiveWeekends,
+  formatWeekendLabel,
+} from '../utils/bookingValidation';
 import './BookingList.css';
 
 /**
@@ -21,6 +25,20 @@ function BookingList({ bookings, currentUser, onDelete, onEdit }) {
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   const today = todayKey();
+
+  const editWeekendWarning =
+    editingId && editForm.startDate && editForm.endDate
+      ? (() => {
+          const r = checkConsecutiveWeekends({
+            startDate: editForm.startDate,
+            endDate: editForm.endDate,
+            userId: currentUser.uid,
+            existingBookings: bookings,
+            excludeId: editingId,
+          });
+          return r.hasConflict ? r : null;
+        })()
+      : null;
 
   const filtered = bookings.filter((booking) => {
     if (filter === 'upcoming') return booking.endDate >= today;
@@ -215,12 +233,32 @@ function BookingList({ bookings, currentUser, onDelete, onEdit }) {
                     rows="2"
                     maxLength="200"
                   />
+                  {editWeekendWarning && (
+                    <div className="weekend-warning-inline">
+                      <strong>⚠️ Due weekend consecutivi</strong>
+                      <p>
+                        {editWeekendWarning.reason === 'self'
+                          ? `Le nuove date coprono ${formatWeekendLabel(
+                              editWeekendWarning.previousWeekend
+                            )} + ${formatWeekendLabel(
+                              editWeekendWarning.currentWeekend
+                            )}.`
+                          : `Hai un'altra prenotazione sul weekend del ${formatWeekendLabel(
+                              editWeekendWarning.previousWeekend
+                            )}; queste nuove date toccano ${formatWeekendLabel(
+                              editWeekendWarning.currentWeekend
+                            )}.`}
+                      </p>
+                    </div>
+                  )}
                   <div className="edit-buttons">
                     <button
-                      className="btn-save"
+                      className={`btn-save ${
+                        editWeekendWarning ? 'btn-save-warning' : ''
+                      }`}
                       onClick={() => handleSaveEdit(booking.id)}
                     >
-                      Salva
+                      {editWeekendWarning ? 'Salva (con avviso ⚠️)' : 'Salva'}
                     </button>
                     <button
                       className="btn-cancel"

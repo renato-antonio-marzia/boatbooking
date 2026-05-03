@@ -11,7 +11,7 @@
  * ----------------------------------------------------------------------
  */
 
-import { compareDateKeys, todayKey } from './dateHelpers';
+import { compareDateKeys, todayKey, parseLocalDate, addDaysKey, expandDateRange } from './dateHelpers';
 
 /**
  * Verifica se due intervalli di date si sovrappongono.
@@ -93,3 +93,117 @@ export function validateBooking({
 
   return { valid: true, errors: [], conflicts: [] };
 }
+
+/**
+ * Restituisce la lista dei weekend (sabati) toccati dall'intervallo [start, end].
+ * Un weekend è "toccato" se l'intervallo include almeno il sabato o la domenica.
+ * Ogni weekend è identificato dalla data del suo SABATO (chiave canonica).
+ *
+ * @returns {Array<{sat: string, sun: string}>} ordinati cronologicamente
+ */
+export function getWeekendsInRange(startKey, endKey) {
+  if (!startKey || !endKey || compareDateKeys(startKey, endKey) > 0) return [];
+
+  const saturdaySet = new Set();
+  for (const dateKey of expandDateRange(startKey, endKey)) {
+    const d = parseLocalDate(dateKey);
+    const dow = d.getDay(); // 0=Dom, 6=Sab
+    if (dow === 6) {
+      saturdaySet.add(dateKey);
+    } else if (dow === 0) {
+      saturdaySet.add(addDaysKey(dateKey, -1));
+    }
+  }
+
+  return Array.from(saturdaySet)
+    .sort()
+    .map((sat) => ({ sat, sun: addDaysKey(sat, 1) }));
+}
+
+/**
+ * Verifica la regola di equità: lo stesso utente non dovrebbe prenotare
+ * due weekend consecutivi (per dare opportunità a tutti i fratelli).
+ *
+ * Trigger:
+ * 1. Stesso utente ha un'altra prenotazione che tocca il weekend precedente
+ *    a uno dei weekend toccati dalla nuova prenotazione.
+ * 2. La nuova prenotazione stessa copre 2 weekend consecutivi (es. lunga
+ *    prenotazione che attraversa due sab/dom adiacenti).
+ *
+ * @returns {Object} { hasConflict, reason, previousWeekend, currentWeekend, conflictingBooking }
+ */
+export function checkConsecutiveWeekends({
+  startDate,
+  endDate,
+  userId,
+  existingBookings = [],
+  excludeId = null,
+}) {
+  const newWeekends = getWeekendsInRange(startDate, endDate);
+  if (newWeekends.length === 0) {
+    return { hasConflict: false };
+  }
+
+  // Caso 2 — stessa prenotazione copre 2 weekend consecutivi
+  for (let i = 1; i < newWeekends.length; i++) {
+    const prevSat = newWeekends[i - 1].sat;
+    const currSat = newWeekends[i].sat;
+    if (addDaysKey(prevSat, 7) === currSat) {
+      return {
+        hasConflict: true,
+        reason: 'self',
+        previousWeekend: newWeekends[i - 1],
+        currentWeekend: newWeekends[i],
+        conflictingBooking: null,
+      };
+    }
+  }
+
+  // Caso 1 — altra prenotazione dello stesso utente sul weekend precedente
+  const myOtherBookings = existingBookings.filter(
+    (b) => b.userId === userId && b.id !== excludeId
+  );
+
+  for (const w of newWeekends) {
+    const prevSat = addDaysKey(w.sat, -7);
+    const prevSun = addDaysKey(w.sat, -6);
+
+    const conflictingBooking = myOtherBookings.find(
+      (b) =>
+        compareDateKeys(b.startDate, prevSun) <= 0 &&
+        compareDateKeys(prevSat, b.endDate) <= 0
+    );
+
+    if (conflictingBooking) {
+      return {
+        hasConflict: true,
+        reason: 'other',
+        previousWeekend: { sat: prevSat, sun: prevSun },
+        currentWeekend: w,
+        conflictingBooking,
+      };
+    }
+  }
+
+  return { hasConflict: false };
+}
+
+/**
+ * Formato leggibile di una coppia (sat, sun) tipo "10–11 maggio 2026".
+ * Helper per messaggi UI.
+ */
+export function formatWeekendLabel(weekend) {
+  if (!weekend) return '';
+  const sat = parseLocalDate(weekend.sat);
+  const sun = parseLocalDate(weekend.sun);
+  const monthFmt = sat.toLocaleDateString('it-IT', { month: 'long' });
+  const monthFmtSun = sun.toLocaleDateString('it-IT', { month: 'long' });
+  if (monthFmt === monthFmtSun) {
+    return `${sat.getDate()}–${sun.getDate()} ${monthFmt} ${sat.getFullYear()}`;
+  }
+  // Weekend a cavallo di due mesi (raro: ultimo sabato di un mese)
+  const dayMonth = (d) =>
+    d.toLocaleDateString('it-IT', { day: 'numeric', month: 'long' });
+  return `${dayMonth(sat)}–${dayMonth(sun)} ${sat.getFullYear()}`;
+}
+

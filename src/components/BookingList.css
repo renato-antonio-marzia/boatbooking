@@ -40,6 +40,35 @@
   font-size: 13px;
 }
 
+.weekend-warning-inline {
+  background: #fffbeb;
+  border: 1.5px solid #f59e0b;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: #78350f;
+  margin: 4px 0;
+}
+
+.weekend-warning-inline strong {
+  display: block;
+  color: #92400e;
+  margin-bottom: 4px;
+}
+
+.weekend-warning-inline p {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.btn-save-warning {
+  background: #d97706;
+}
+
+.btn-save-warning:hover:not(:disabled) {
+  background: #b45309;
+}
+
 .booking-card {
   background: white;
   border: 1.5px solid #e5e7eb;
