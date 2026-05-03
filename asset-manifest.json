@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/boatbooking/static/css/main.c97609df.css",
+    "main.js": "/boatbooking/static/js/main.83e67a5d.js",
+    "index.html": "/boatbooking/index.html",
+    "main.c97609df.css.map": "/boatbooking/static/css/main.c97609df.css.map",
+    "main.83e67a5d.js.map": "/boatbooking/static/js/main.83e67a5d.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.c97609df.css",
+    "static/js/main.83e67a5d.js"
+  ]
+}
