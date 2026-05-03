@@ -34,3 +34,6 @@ Thumbs.db
 
 # Cache
 .eslintcache
+
+# File one-shot di bootstrap dati Firebase (contiene email/PII)
+firebase-data-recipients.json
