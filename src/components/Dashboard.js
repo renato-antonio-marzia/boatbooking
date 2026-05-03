@@ -1,36 +1,65 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ref, onValue, push, remove, update } from 'firebase/database';
 import { database } from '../firebaseConfig';
 import { validateBooking } from '../utils/bookingValidation';
-import { todayKey, formatDateKey } from '../utils/dateHelpers';
+import { todayKey } from '../utils/dateHelpers';
+import { sendBookingNotifications } from '../utils/notifications';
 import Calendar from './Calendar';
 import BookingForm from './BookingForm';
 import BookingList from './BookingList';
+import { ToastContainer } from './Toast';
 import './Dashboard.css';
 
 function Dashboard({ user }) {
   const [bookings, setBookings] = useState([]);
+  const [recipients, setRecipients] = useState([]);
   const [selectedDate, setSelectedDate] = useState(todayKey());
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [permissionError, setPermissionError] = useState('');
+  const [toasts, setToasts] = useState([]);
+
+  const knownBookingIdsRef = useRef(null);
+
+  const dismissToast = useCallback((id) => {
+    setToasts((curr) => curr.filter((t) => t.id !== id));
+  }, []);
+
+  const pushToast = useCallback((message) => {
+    setToasts((curr) => [
+      ...curr,
+      { id: `${Date.now()}-${Math.random()}`, message },
+    ]);
+  }, []);
 
   useEffect(() => {
     const bookingsRef = ref(database, 'bookings');
     const unsubscribe = onValue(
       bookingsRef,
       (snapshot) => {
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          const list = Object.entries(data).map(([id, booking]) => ({
-            id,
-            ...booking,
-          }));
-          setBookings(list);
-          setPermissionError('');
+        const data = snapshot.exists() ? snapshot.val() : {};
+        const list = Object.entries(data).map(([id, booking]) => ({
+          id,
+          ...booking,
+        }));
+
+        if (knownBookingIdsRef.current === null) {
+          knownBookingIdsRef.current = new Set(list.map((b) => b.id));
         } else {
-          setBookings([]);
+          const newOnes = list.filter(
+            (b) =>
+              !knownBookingIdsRef.current.has(b.id) && b.userId !== user.uid
+          );
+          newOnes.forEach((b) => {
+            pushToast(
+              `${b.userName} ha prenotato dal ${b.startDate} al ${b.endDate}`
+            );
+          });
+          knownBookingIdsRef.current = new Set(list.map((b) => b.id));
         }
+
+        setBookings(list);
+        setPermissionError('');
         setLoading(false);
       },
       (error) => {
@@ -43,10 +72,28 @@ function Dashboard({ user }) {
       }
     );
     return () => unsubscribe();
-  }, [user.uid]);
+  }, [user.uid, pushToast]);
+
+  useEffect(() => {
+    const recipientsRef = ref(database, 'notification_recipients');
+    const unsubscribe = onValue(
+      recipientsRef,
+      (snapshot) => {
+        if (!snapshot.exists()) {
+          setRecipients([]);
+          return;
+        }
+        const list = Object.values(snapshot.val()).filter(
+          (r) => r && r.email
+        );
+        setRecipients(list);
+      },
+      () => setRecipients([])
+    );
+    return () => unsubscribe();
+  }, []);
 
   const handleAddBooking = async (bookingData) => {
-    // Validazione lato client (la regola Firebase la rifarà comunque)
     const validation = validateBooking({
       startDate: bookingData.startDate,
       endDate: bookingData.endDate,
@@ -58,15 +105,26 @@ function Dashboard({ user }) {
     }
 
     const bookingsRef = ref(database, 'bookings');
-    await push(bookingsRef, {
+    const newBooking = {
       startDate: bookingData.startDate,
       endDate: bookingData.endDate,
       notes: bookingData.notes || '',
       userId: user.uid,
       userName: user.displayName || user.email,
       createdAt: new Date().toISOString(),
-    });
+    };
+    await push(bookingsRef, newBooking);
     setShowForm(false);
+
+    sendBookingNotifications({
+      booking: newBooking,
+      recipients,
+      authorEmail: user.email,
+    }).then((result) => {
+      if (result?.sent > 0) {
+        pushToast(`Email inviata a ${result.sent} destinatari`);
+      }
+    });
   };
 
   const handleDeleteBooking = async (bookingId) => {
@@ -80,7 +138,6 @@ function Dashboard({ user }) {
 
   const handleEditBooking = async (bookingId, updatedData) => {
     try {
-      // Se sono cambiate le date, valida la sovrapposizione (escludendo la stessa prenotazione)
       if (updatedData.startDate || updatedData.endDate) {
         const current = bookings.find((b) => b.id === bookingId);
         const startDate = updatedData.startDate || current.startDate;
@@ -126,6 +183,7 @@ function Dashboard({ user }) {
 
   return (
     <div className="dashboard">
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
       <div className="dashboard-container">
         <div className="dashboard-grid">
           <section className="calendar-section">

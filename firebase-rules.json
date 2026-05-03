@@ -5,6 +5,24 @@
       ".write": false
     },
 
+    "notification_recipients": {
+      ".read": "auth != null && root.child('authorized_users').child(auth.uid).val() === true",
+      ".write": false,
+
+      "$entryId": {
+        ".validate": "newData.hasChildren(['email', 'name'])",
+        "email": {
+          ".validate": "newData.isString() && newData.val().matches(/^[^@]+@[^@]+\\.[^@]+$/)"
+        },
+        "name": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 100"
+        },
+        "$other": {
+          ".validate": false
+        }
+      }
+    },
+
     "bookings": {
       ".read": "auth != null && root.child('authorized_users').child(auth.uid).val() === true",
       ".write": "auth != null && root.child('authorized_users').child(auth.uid).val() === true",
