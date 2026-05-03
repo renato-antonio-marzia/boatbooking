@@ -1,6 +1,7 @@
 import emailjs from '@emailjs/browser';
 import { format, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
+import { getBoat } from '../config/boats';
 
 const SERVICE_ID = process.env.REACT_APP_EMAILJS_SERVICE_ID;
 const TEMPLATE_ID = process.env.REACT_APP_EMAILJS_TEMPLATE_ID;
@@ -35,11 +36,14 @@ export async function sendBookingNotifications({
     return { sent: 0, skipped: recipients.length };
   }
 
+  const boat = getBoat(booking.boatId);
   const params = {
     author_name: booking.userName,
     start_date: formatItalianDate(booking.startDate),
     end_date: formatItalianDate(booking.endDate),
     notes: booking.notes?.trim() ? booking.notes : '(nessuna nota)',
+    boat_name: boat.label,
+    boat_icon: boat.icon,
   };
 
   const results = await Promise.allSettled(

@@ -52,6 +52,9 @@
         "createdAt": {
           ".validate": "newData.isString()"
         },
+        "boatId": {
+          ".validate": "newData.isString() && (newData.val() === 'barca' || newData.val() === 'gommone')"
+        },
         "$other": {
           ".validate": false
         }

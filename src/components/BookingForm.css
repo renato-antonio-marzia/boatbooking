@@ -64,6 +64,57 @@
   font-size: 11px;
 }
 
+.boat-selector-group label {
+  margin-bottom: 4px;
+}
+
+.boat-selector {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.boat-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-transform: none;
+  font-size: 14px;
+  color: #1f2937;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+
+.boat-option:hover {
+  border-color: #1e3a8a;
+}
+
+.boat-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.boat-option-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.boat-option-label {
+  font-weight: 600;
+}
+
+.boat-option.selected {
+  font-weight: 700;
+}
+
 .duration-info {
   background: #eff6ff;
   color: #1e3a8a;

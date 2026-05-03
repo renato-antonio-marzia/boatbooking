@@ -40,6 +40,45 @@
   font-size: 13px;
 }
 
+.boat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 12px;
+  border: 1px solid;
+  margin-left: 8px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.edit-boat-selector {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-boat-option {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 6px;
+  background: white;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.edit-boat-option:hover {
+  border-color: #1e3a8a;
+}
+
+.edit-boat-option.selected {
+  font-weight: 700;
+}
+
 .weekend-warning-inline {
   background: #fffbeb;
   border: 1.5px solid #f59e0b;

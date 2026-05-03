@@ -106,6 +106,7 @@ function Dashboard({ user }) {
 
     const bookingsRef = ref(database, 'bookings');
     const newBooking = {
+      boatId: bookingData.boatId || 'barca',
       startDate: bookingData.startDate,
       endDate: bookingData.endDate,
       notes: bookingData.notes || '',

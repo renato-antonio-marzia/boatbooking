@@ -6,6 +6,7 @@ import {
   checkConsecutiveWeekends,
   formatWeekendLabel,
 } from '../utils/bookingValidation';
+import { BOAT_LIST, getBoat, DEFAULT_BOAT_ID } from '../config/boats';
 import './BookingList.css';
 
 /**
@@ -21,7 +22,12 @@ import './BookingList.css';
 function BookingList({ bookings, currentUser, onDelete, onEdit }) {
   const [filter, setFilter] = useState('upcoming'); // 'all' | 'upcoming' | 'past'
   const [editingId, setEditingId] = useState(null);
-  const [editForm, setEditForm] = useState({ startDate: '', endDate: '', notes: '' });
+  const [editForm, setEditForm] = useState({
+    boatId: DEFAULT_BOAT_ID,
+    startDate: '',
+    endDate: '',
+    notes: '',
+  });
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   const today = todayKey();
@@ -53,6 +59,7 @@ function BookingList({ bookings, currentUser, onDelete, onEdit }) {
   const handleEditClick = (booking) => {
     setEditingId(booking.id);
     setEditForm({
+      boatId: booking.boatId || DEFAULT_BOAT_ID,
       startDate: booking.startDate,
       endDate: booking.endDate,
       notes: booking.notes || '',
@@ -63,6 +70,7 @@ function BookingList({ bookings, currentUser, onDelete, onEdit }) {
   const handleSaveEdit = async (bookingId) => {
     try {
       await onEdit(bookingId, {
+        boatId: editForm.boatId,
         startDate: editForm.startDate,
         endDate: editForm.endDate,
         notes: editForm.notes,
@@ -120,6 +128,7 @@ function BookingList({ bookings, currentUser, onDelete, onEdit }) {
           const isEditing = editingId === booking.id;
           const isPast = booking.endDate < today;
           const days = daysBetween(booking.startDate, booking.endDate);
+          const boat = getBoat(booking.boatId);
 
           return (
             <div
@@ -142,6 +151,17 @@ function BookingList({ bookings, currentUser, onDelete, onEdit }) {
                       <p className="booking-user">
                         Prenotato da: <strong>{booking.userName}</strong>
                         {isOwner && <span className="owner-badge">Tu</span>}
+                        <span
+                          className="boat-badge"
+                          style={{
+                            background: `${boat.color}15`,
+                            color: boat.color,
+                            borderColor: `${boat.color}40`,
+                          }}
+                          title={boat.label}
+                        >
+                          {boat.icon} {boat.label}
+                        </span>
                       </p>
                     </div>
                     {isOwner && !isPast && (
@@ -200,6 +220,25 @@ function BookingList({ bookings, currentUser, onDelete, onEdit }) {
                 </>
               ) : (
                 <div className="edit-form">
+                  <div className="edit-boat-selector">
+                    {BOAT_LIST.map((b) => (
+                      <button
+                        key={b.id}
+                        type="button"
+                        className={`edit-boat-option ${
+                          editForm.boatId === b.id ? 'selected' : ''
+                        }`}
+                        style={
+                          editForm.boatId === b.id
+                            ? { borderColor: b.color, background: `${b.color}15` }
+                            : undefined
+                        }
+                        onClick={() => setEditForm({ ...editForm, boatId: b.id })}
+                      >
+                        {b.icon} {b.label}
+                      </button>
+                    ))}
+                  </div>
                   <div className="edit-row">
                     <label>
                       Inizio

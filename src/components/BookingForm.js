@@ -5,6 +5,7 @@ import {
   formatWeekendLabel,
 } from '../utils/bookingValidation';
 import { todayKey } from '../utils/dateHelpers';
+import { BOAT_LIST, DEFAULT_BOAT_ID } from '../config/boats';
 import './BookingForm.css';
 
 function BookingForm({ onSubmit, selectedDateKey, existingBookings, currentUserId }) {
@@ -12,6 +13,7 @@ function BookingForm({ onSubmit, selectedDateKey, existingBookings, currentUserI
   const initialDate =
     selectedDateKey && selectedDateKey >= today ? selectedDateKey : today;
 
+  const [boatId, setBoatId] = useState(DEFAULT_BOAT_ID);
   const [startDate, setStartDate] = useState(initialDate);
   const [endDate, setEndDate] = useState(initialDate);
   const [notes, setNotes] = useState('');
@@ -59,7 +61,8 @@ function BookingForm({ onSubmit, selectedDateKey, existingBookings, currentUserI
     setError('');
     setLoading(true);
     try {
-      await onSubmit({ startDate, endDate, notes: notes.trim() });
+      await onSubmit({ boatId, startDate, endDate, notes: notes.trim() });
+      setBoatId(DEFAULT_BOAT_ID);
       setStartDate(today);
       setEndDate(today);
       setNotes('');
@@ -80,6 +83,33 @@ function BookingForm({ onSubmit, selectedDateKey, existingBookings, currentUserI
 
   return (
     <form className="booking-form" onSubmit={handleSubmit}>
+      <div className="form-group boat-selector-group">
+        <label>Imbarcazione</label>
+        <div className="boat-selector">
+          {BOAT_LIST.map((b) => (
+            <label
+              key={b.id}
+              className={`boat-option ${boatId === b.id ? 'selected' : ''}`}
+              style={
+                boatId === b.id
+                  ? { borderColor: b.color, background: `${b.color}15` }
+                  : undefined
+              }
+            >
+              <input
+                type="radio"
+                name="boatId"
+                value={b.id}
+                checked={boatId === b.id}
+                onChange={() => setBoatId(b.id)}
+              />
+              <span className="boat-option-icon">{b.icon}</span>
+              <span className="boat-option-label">{b.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
       <div className="form-row">
         <div className="form-group">
           <label htmlFor="startDate">Data inizio</label>

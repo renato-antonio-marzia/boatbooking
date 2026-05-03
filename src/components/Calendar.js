@@ -17,6 +17,7 @@ import {
   parseLocalDate,
   expandDateRange,
 } from '../utils/dateHelpers';
+import { getBoat } from '../config/boats';
 import './Calendar.css';
 
 /**
@@ -119,13 +120,20 @@ function Calendar({ selectedDate, onDateSelect, bookings, currentUserId }) {
               } ${isTodayDate ? 'today' : ''} ${bookingClass}`}
               title={
                 dayBookings.length > 0
-                  ? dayBookings.map((b) => b.userName).join(', ')
+                  ? dayBookings
+                      .map(
+                        (b) =>
+                          `${b.userName} (${getBoat(b.boatId).label})`
+                      )
+                      .join(', ')
                   : ''
               }
             >
               <span className="day-number">{format(day, 'd')}</span>
               {dayBookings.length > 0 && (
-                <span className="booking-dot" aria-hidden="true"></span>
+                <span className="boat-badge-day" aria-hidden="true">
+                  {getBoat(dayBookings[0].boatId).icon}
+                </span>
               )}
             </button>
           );
@@ -146,8 +154,12 @@ function Calendar({ selectedDate, onDateSelect, bookings, currentUserId }) {
           <span>Altri</span>
         </div>
         <div className="legend-item">
-          <span className="legend-dot mixed-dot"></span>
-          <span>Sovrapp.</span>
+          <span className="legend-icon">⛵</span>
+          <span>Barca</span>
+        </div>
+        <div className="legend-item">
+          <span className="legend-icon">🚤</span>
+          <span>Gommone</span>
         </div>
       </div>
     </div>
