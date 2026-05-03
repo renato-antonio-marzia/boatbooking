@@ -1,11 +1,8 @@
 {
   "rules": {
-    "_comment_authorized_users": "Inserire qui gli UID dei fratelli autorizzati. Sostituire i placeholder con gli UID reali ottenuti dopo la prima registrazione di ciascuno.",
-
     "authorized_users": {
-      "NzhPztV5IjNhFXXBEsShG3Qe4VG3": true,
-      "UID_FRATELLO_2_PLACEHOLDER": true,
-      "UID_FRATELLO_3_PLACEHOLDER": true
+      ".read": "auth != null",
+      ".write": false
     },
 
     "bookings": {
